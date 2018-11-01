@@ -1,0 +1,41 @@
+version: "3.2"
+services:
+
+  airflow:
+    build: .
+    depends_on: 
+      - mariadb
+    # For GCSFuse
+    cap_add:
+      - SYS_ADMIN
+    devices: 
+      - /dev/fuse
+    environment: 
+      - AIRFLOW_HOME=/project/airflow_home
+    image: airflow-container
+    networks: 
+      - airflow
+    ports:
+      - "8080:8080"
+    # To Avoid shutdown after start
+    tty: true
+    volumes:
+      # Change to mount your project volumes
+      - "./:/project"
+      # Credential GCP
+      - "~/.config/gcloud:/root/.config/gcloud"
+
+  mariadb:
+    environment:
+      - MYSQL_ROOT_PASSWORD=root-pwd
+      - MYSQL_DATABASE=airflow
+      - MYSQL_USER=airflow
+      - MYSQL_PASSWORD=airflow
+    image: mariadb
+    networks: 
+      - airflow
+    ports: 
+      - "3306:3306"
+
+networks:
+  airflow:
